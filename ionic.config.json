@@ -1,0 +1,7 @@
+{
+  "name": "Gym Science",
+  "integrations": {
+    "cordova": {}
+  },
+  "type": "angular"
+}
