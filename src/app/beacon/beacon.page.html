@@ -4,6 +4,11 @@
   </ion-toolbar>
 </ion-header>
 
-<ion-content>
-
+<ion-content >
+  <ion-col *ngIf="showData" size-lg="4" size-md="6" size-sm="6" size-xs="12">
+  <ion-item  > UUID: {{ beaconData.uuid }} <br>
+    Rssi:  {{ beaconData.rssi }} 
+    Tx:  {{ beaconData.tx }}
+    Accuracy:  {{ beaconData.accuracy }} </ion-item>
+  </ion-col>
 </ion-content>
