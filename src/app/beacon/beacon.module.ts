@@ -10,6 +10,7 @@ import { BeaconPage } from './beacon.page';
 
 import { IBeacon } from '@ionic-native/ibeacon/ngx';
 
+
 @NgModule({
   imports: [
     CommonModule,
