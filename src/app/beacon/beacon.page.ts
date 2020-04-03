@@ -2,7 +2,7 @@ import { Component, OnInit, NgZone, ChangeDetectorRef } from '@angular/core';
 import { Platform } from '@ionic/angular';
 import { IBeacon } from '@ionic-native/ibeacon/ngx';
 import { BLE } from '@ionic-native/ble/ngx';
-import { BleService } from '../services/ble.service';
+import { BleService } from '../../services/ble/ble.service';
 
 @Component({
   selector: 'app-beacon',
@@ -28,22 +28,28 @@ export class BeaconPage implements OnInit {
     await this.platform.ready().then( () => {
 
         this.ngZone.run(() => {
-          // Request permission to use location on iOS
-          this.ibeacon.requestAlwaysAuthorization();
 
+          //////////////////////////////////// SENSOR DEVICE ///////////////////////////////////////
           console.log('started scanning');
-          console.log(this.bleService.toScanUuids);
-          this.ble.isEnabled().then(() => console.log('enabled'));
-          this.ble.startScan(['5f3a95e4-2b09-c8a9-5d36-826d4cc79ee5', '6a800001-b5a3-f393-e0a9-e50e24dcca9e']).subscribe((device) => {
-            console.log('detected', device);
-          }, error => {
-            console.log('start scan error', error);
-          });
+          this.ble.isEnabled().then(() => {
+            console.log('enabled');
+            this.ble.startScan(this.bleService.toScanUuids).subscribe((device) => {
+              console.log('detected', device);
+            }, error => {
+              console.log('start scan error', error);
+            });
+          } );
           // setTimeout(() => {
           //   console.log('no devices');
           //   this.ble.stopScan();
           // }, 10000);
-          // enable bluetooth
+
+
+
+          ///////////////////////////////// IBEACON DEVICE////////////////////////////////
+          // Request permission to use location on iOS
+          // this.ibeacon.requestAlwaysAuthorization();
+          // // enable bluetooth
           // this.ibeacon.enableBluetooth().then(
           //   () => {
           // // create a new delegate and register it with the native layer
