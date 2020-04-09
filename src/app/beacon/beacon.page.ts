@@ -91,7 +91,7 @@ export class BeaconPage implements OnInit {
       console.log('enabled');
       const sensorPro = '5f3a95e4-2b09-c8a9-5d36-826d4cc79ee5';
       const ibeaconDevice = '582C0ECF-183D-EFC9-FE32-D36EEDACF948';
-      this.ble.startScan(['99c80001-901e-4afc-9f2e-6fa110a2c4f5']).subscribe((device) => {
+      this.ble.scan([], 5).subscribe((device) => {
         this.devices.push(device);
         this.cd.detectChanges();
       }, error => {
