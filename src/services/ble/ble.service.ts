@@ -9,6 +9,7 @@ import { tap, catchError } from 'rxjs/operators';
 })
 export class BleService {
 
+  deviceId = 'F7:A2:12:8F:25:0C';
   deviceUuid = '5f3a95e4-2b09-c8a9-5d36-826d4cc79ee5';
   primaryServiceUuid = '6a800001-b5a3-f393-e0a9-e50e24dcca9e';
   apDataUuid = '6a803216-b5a3-f393-e0a9-e50e24dcca9e';

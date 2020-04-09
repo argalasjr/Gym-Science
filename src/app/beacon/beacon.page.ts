@@ -15,6 +15,7 @@ export class BeaconPage implements OnInit {
   private beaconRegion = null;
   public beaconData: any = null;
   public showData = false;
+  devices: any = [];
   constructor(
     public platform: Platform,
     public ibeacon: IBeacon,
@@ -30,15 +31,6 @@ export class BeaconPage implements OnInit {
         this.ngZone.run(() => {
 
           //////////////////////////////////// SENSOR DEVICE ///////////////////////////////////////
-          console.log('started scanning');
-          this.ble.isEnabled().then(() => {
-            console.log('enabled');
-            this.ble.startScan(this.bleService.toScanUuids).subscribe((device) => {
-              console.log('detected', device);
-            }, error => {
-              console.log('start scan error', error);
-            });
-          } );
           // setTimeout(() => {
           //   console.log('no devices');
           //   this.ble.stopScan();
@@ -94,23 +86,55 @@ export class BeaconPage implements OnInit {
 }
 
   async startScan() {
-    this.ibeacon.isBluetoothEnabled()
-    .then(
-      () => {
-        const uuid = 'B5B182C7-EAB1-4988-AA99-B5C1517008D9';
-        const uuid2 = 'E2C56DB5-DFFB-48D2-B060-D0F5A71096E0';
-        const identifier = 'abeacon_8F82';
-        const minor = 33423;
-        const major = 1;
-        const minor2 = 1;
-        const major2 = 2;
-        this.beaconRegion = this.ibeacon.BeaconRegion(identifier, uuid2, major2, minor2);
-        this.ibeacon.startMonitoringForRegion(this.beaconRegion)
-          .then(
-            () => console.log('Native layer received the request to monitoring'),
-            error => console.error('Native layer failed to begin monitoring: ', error)
-          );
-    }, error => console.error(error)
+    console.log('started scanning');
+    this.ble.isEnabled().then(() => {
+      console.log('enabled');
+      const sensorPro = '5f3a95e4-2b09-c8a9-5d36-826d4cc79ee5';
+      const ibeaconDevice = '582C0ECF-183D-EFC9-FE32-D36EEDACF948';
+      this.ble.startScan(['99c80001-901e-4afc-9f2e-6fa110a2c4f5']).subscribe((device) => {
+        this.devices.push(device);
+        this.cd.detectChanges();
+      }, error => {
+        console.log('start scan error', error);
+      });
+      console.log(this.devices);
+      // this.ble.startScan([sensorPro, ibeaconDevice]).subscribe((device) => {
+      //   console.log('detected', device);
+      // }, error => {
+      //   console.log('start scan error', error);
+      // });
+    } );
+  //   this.ibeacon.isBluetoothEnabled()
+  //   .then(
+  //     () => {
+  //       const uuid = 'B5B182C7-EAB1-4988-AA99-B5C1517008D9';
+  //       const uuid2 = 'E2C56DB5-DFFB-48D2-B060-D0F5A71096E0';
+  //       const identifier = 'abeacon_8F82';
+  //       const minor = 33423;
+  //       const major = 1;
+  //       const minor2 = 1;
+  //       const major2 = 2;
+  //       this.beaconRegion = this.ibeacon.BeaconRegion(identifier, uuid2, major2, minor2);
+  //       this.ibeacon.startMonitoringForRegion(this.beaconRegion)
+  //         .then(
+  //           () => console.log('Native layer received the request to monitoring'),
+  //           error => console.error('Native layer failed to begin monitoring: ', error)
+  //         );
+  //   }, error => console.error(error)
+  //   );
+   }
+
+
+   async connect(device) {
+     this.ble.connect(device.id).subscribe(
+      async (connectedDevice) => {
+        this.cd.detectChanges();
+        console.log('device');
+        console.log(connectedDevice);
+        this.ble.read(connectedDevice.id, this.bleService.primaryServiceUuid, this.bleService.apDataUuid);
+        }, error => {
+       console.log(error);
+      }
     );
-  }
+   }
 }

@@ -1,14 +1,18 @@
 <ion-header>
   <ion-toolbar>
-    <ion-title>beacon</ion-title>
+    <ion-title (click)="startScan()">Click to scan</ion-title>
   </ion-toolbar>
 </ion-header>
 
-<ion-content >
-  <ion-col *ngIf="showData" size-lg="4" size-md="6" size-sm="6" size-xs="12">
-  <ion-item  > UUID: {{ beaconData.uuid }} <br>
-    Rssi:  {{ beaconData.rssi }} 
-    Tx:  {{ beaconData.tx }}
-    Accuracy:  {{ beaconData.accuracy }} </ion-item>
+<ion-content>
+  <ion-col size-lg="4" size-md="6" size-sm="6" size-xs="12">
+    <ion-list lines="none">
+      <ion-item button *ngFor="let device of devices" (click)="connect(device)" detail>
+        <ion-label>
+          <h2>{{device.name}}</h2>
+          <p>{{device.id}}</p>
+        </ion-label>
+      </ion-item>
+    </ion-list>
   </ion-col>
 </ion-content>
