@@ -9,7 +9,6 @@ import { StatusBar } from '@ionic-native/status-bar/ngx';
 import { AppComponent } from './app.component';
 import { AppRoutingModule } from './app-routing.module';
 
-import { IBeacon } from '@ionic-native/ibeacon/ngx';
 import { BLE } from '@ionic-native/ble/ngx';
 
 @NgModule({
@@ -19,7 +18,6 @@ import { BLE } from '@ionic-native/ble/ngx';
   providers: [
     StatusBar,
     SplashScreen,
-    IBeacon,
     BLE,
     { provide: RouteReuseStrategy, useClass: IonicRouteStrategy }
   ],
