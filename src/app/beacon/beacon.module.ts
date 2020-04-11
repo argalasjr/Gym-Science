@@ -8,7 +8,6 @@ import { BeaconPageRoutingModule } from './beacon-routing.module';
 
 import { BeaconPage } from './beacon.page';
 
-import { IBeacon } from '@ionic-native/ibeacon/ngx';
 
 
 @NgModule({
@@ -19,8 +18,6 @@ import { IBeacon } from '@ionic-native/ibeacon/ngx';
     BeaconPageRoutingModule
   ],
   declarations: [BeaconPage],
-  providers: [
-    IBeacon
-  ]
+  providers: [ ]
 })
 export class BeaconPageModule {}
