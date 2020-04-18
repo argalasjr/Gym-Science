@@ -14,5 +14,11 @@
         </ion-label>
       </ion-item>
     </ion-list>
+    <ion-card *ngIf=showData>
+      <ion-card-header>Data received from {{ deviceName }} :</ion-card-header>
+      <ion-item>ap {{ apDataArr}} </ion-item>
+      <ion-item>mpu {{ mpuDataArr}} </ion-item>
+      <ion-item>bmp {{ bmpDataArr}} </ion-item>
+    </ion-card>
   </ion-col>
 </ion-content>
