@@ -1,0 +1,74 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button></ion-back-button>
+    </ion-buttons>
+    <ion-title>Register User</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+
+  <form [formGroup]="signupForm" (submit)="signupUser()" novalidate>
+    <ion-item>
+      <div class="item-note" item-start>
+        <ion-icon name="person" color='primary'></ion-icon>
+      </div>
+      <ion-input formControlName="firstName" type="text" placeholder="Meno" [class.invalid]="!signupForm.controls.firstName.valid && signupForm.controls.firstName.dirty"></ion-input>
+    </ion-item>
+    <ion-item class="error-message" *ngIf="!signupForm.controls.firstName.valid  && signupForm.controls.firstName.dirty"
+      no-lines>
+      <p>Prosím vložte platné meno.</p>
+    </ion-item>
+    <ion-item>
+      <div class="item-note" item-start>
+        <ion-icon name="person" color='primary'></ion-icon>
+      </div>
+      <ion-input formControlName="lastName" type="text" placeholder="Priezvisko" [class.invalid]="!signupForm.controls.lastName.valid && signupForm.controls.lastName.dirty"></ion-input>
+    </ion-item>
+    <ion-item class="error-message" *ngIf="!signupForm.controls.lastName.valid  && signupForm.controls.lastName.dirty"
+      no-lines>
+      <p>Prosím vložte platné priezvisko.</p>
+    </ion-item>
+    <ion-item>
+      <div class="item-note" item-start>
+        <ion-icon name="at" color='primary'></ion-icon>
+      </div>
+      <ion-input formControlName="email" type="email" placeholder="Email" [class.invalid]="!signupForm.controls.email.valid && signupForm.controls.email.dirty"></ion-input>
+    </ion-item>
+    <ion-item class="error-message" *ngIf="!signupForm.controls.email.valid  && signupForm.controls.email.dirty"
+      no-lines>
+      <p>Prosím vložte platný email.</p>
+    </ion-item>
+    <ion-item>
+      <div class="item-note" item-start>
+        <ion-icon name="lock" color='primary'></ion-icon>
+      </div>
+      <ion-input formControlName="password" type="password" placeholder=" Heslo" [class.invalid]="!signupForm.controls.password.valid && signupForm.controls.password.dirty"></ion-input>
+    </ion-item>
+    <ion-item class="error-message" *ngIf="!signupForm.controls.password.valid  && signupForm.controls.password.dirty"
+      no-lines>
+      <p>Heslo músí mať aspoň 6 znakov</p>
+    </ion-item>
+    <ion-item>
+      <div class="item-note" item-start>
+        <ion-icon name="lock" color='primary'></ion-icon>
+      </div>
+      <ion-input formControlName="retype" type="password" placeholder=" Potvrdiť heslo" [class.invalid]="!signupForm.controls.retype.valid && signupForm.controls.retype.dirty"></ion-input>
+    </ion-item>
+    <ion-item class="error-message" *ngIf="!signupForm.controls.retype.valid  && signupForm.controls.retype.dirty"
+      no-lines>
+      <p>Heslo músí mať aspoň 6 znakov</p>
+    </ion-item>
+    <ion-grid>
+      <ion-row>
+        <ion-col style="text-align: center">
+          <ion-button  block enter-all color='secondary' type="submit" [disabled]="!signupForm.valid">
+            Vytvoriť účet
+          </ion-button>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+  </form>
+
+</ion-content>

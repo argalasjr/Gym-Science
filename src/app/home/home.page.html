@@ -1,12 +1,69 @@
 <ion-header>
-  <ion-toolbar>
-    <ion-title>Home</ion-title>
+  <ion-toolbar color='primary'>
+    <ion-title>
+      Lifter Profile
+
+    </ion-title>
+    <ion-buttons slot="end">
+      <ion-button type="submit" (click)="authService.SignOut()" expand="block">Logout</ion-button>
+    </ion-buttons>
+
+
   </ion-toolbar>
 </ion-header>
 
-<ion-content >
-  <ion-col *ngIf="showData" size-lg="4" size-md="6" size-sm="6" size-xs="12">
-  <ion-item  > UUID: {{ sensor.uuid }} <br>
- </ion-item>
-  </ion-col>
+<ion-content class="ion-padding">
+  <ion-item lines="none" >
+    <ion-avatar slot="start">
+      <img src="{{ (userDoc | async)?.photoURL }}">
+    </ion-avatar>
+    <ion-label>{{ (userDoc | async)?.displayName }}</ion-label>
+  </ion-item>
+
+  <ion-item-group>
+    <ion-item-divider>
+      <ion-label>Bio</ion-label>
+    </ion-item-divider>   
+    <ion-item (click)="modifyBioItem()">
+      <ion-label>Vek: {{ (userDoc | async)?.age }}</ion-label>
+    </ion-item>
+    <ion-item>
+      <ion-label>Váha: {{ (userDoc | async)?.age }}</ion-label>
+    </ion-item>
+    <ion-item>
+      <ion-label>Výška: {{ (userDoc | async)?.age }}</ion-label>
+    </ion-item>
+    <ion-item>
+      <ion-label>BMI: {{ (userDoc | async)?.bmi }}</ion-label>
+    </ion-item>
+    <ion-item>
+      <ion-label>% tuku: {{ (userDoc | async)?.fat }}</ion-label>
+    </ion-item>
+    <ion-item>
+      <ion-label>% svalov: {{ (userDoc | async)?.muscle }}</ion-label>
+    </ion-item>
+    <ion-item>
+      <ion-label>% vody: {{ (userDoc | async)?.water }}</ion-label>
+    </ion-item>
+  </ion-item-group>
+  
+  
+  <ion-item-group>
+    <ion-item-divider>
+      <ion-label>Personal records</ion-label>
+    </ion-item-divider>
+    <ion-list  lines="none" *ngFor="let lift of userLiftRef  | async"  >    
+    <ion-item>
+      <ion-label>{{(lift.liftName)}}</ion-label>
+    </ion-item>
+    </ion-list>
+    <ion-input #taskInput type="text" [(ngModel)]="liftName" placeholder="Pridať cvik"></ion-input>
+    <div class="item-note" item-end>
+      <button ion-button color='secondary' (click)="addItem()">
+        <ion-icon name="add"></ion-icon>
+      </button>
+    </div>
+    </ion-item-group>
+
+
 </ion-content>

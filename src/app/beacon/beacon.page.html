@@ -1,5 +1,5 @@
 <ion-header>
-  <ion-toolbar>
+    <ion-toolbar color='primary'>
     <ion-title (click)="startScan()">Click to scan</ion-title>
   </ion-toolbar>
 </ion-header>
@@ -16,9 +16,8 @@
     </ion-list>
     <ion-card *ngIf=showData>
       <ion-card-header>Data received from {{ deviceName }} :</ion-card-header>
-      <ion-item>ap {{ apDataArr}} </ion-item>
-      <ion-item>mpu {{ mpuDataArr}} </ion-item>
-      <ion-item>bmp {{ bmpDataArr}} </ion-item>
+      <ion-item> ax: {{ accData.ax | number:'1.2-2'}} ay: {{ accData.ay | number:'1.2-2'}} az: {{ accData.az | number:'1.2-2'}}</ion-item>
+      <ion-item> gx: {{ gyroData.gx | number:'1.2-2'}} gy {{ gyroData.gy | number:'1.2-2'}} gz {{ gyroData.gz | number:'1.2-2'}}</ion-item>
     </ion-card>
   </ion-col>
 </ion-content>

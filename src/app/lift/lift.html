@@ -1,0 +1,29 @@
+<ion-header>
+  <ion-toolbar color='primary'>
+    <ion-title>
+      Lift Execution
+
+    </ion-title>
+    <!-- <ion-buttons end>
+        <button ion-button solid color='secondary' (click)="logout()">Odhlásiť</button>
+    </ion-buttons> -->
+
+
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  
+  <ion-col style="text-align: center">
+  <app-lift-chart></app-lift-chart>
+
+
+
+    <ion-row>
+  <ion-button center-all block  color="danger" (click)="chart.barIsLoaded()">
+    Bar is loaded!
+  </ion-button>
+</ion-row>
+</ion-col>
+  
+</ion-content>

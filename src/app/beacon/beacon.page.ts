@@ -2,7 +2,7 @@ import { Component, OnInit, NgZone, ChangeDetectorRef } from '@angular/core';
 import { Platform } from '@ionic/angular';
 import { BLE } from '@ionic-native/ble/ngx';
 import { BleService } from '../../services/ble/ble.service';
-import * as advlib from 'advlib';
+
 export interface PeripheralCharacteristic {
   service: string;
   characteristic: string;
@@ -17,6 +17,20 @@ export interface PeripheralData {
   advertising: ArrayBuffer | any;
 }
 
+export interface AccelerometerData {
+  ax: number;
+  ay: number;
+  az: number;
+}
+
+
+export interface GyroData {
+  gx: number;
+  gy: number;
+  gz: number;
+}
+
+
 export interface PeripheralDataExtended extends PeripheralData {
   services: string[];
   characteristics: PeripheralCharacteristic[];
@@ -29,16 +43,15 @@ export interface PeripheralDataExtended extends PeripheralData {
 })
 export class BeaconPage implements OnInit {
 
-  private delegate = null;
-  private beaconRegion = null;
-  public beaconData: any = null;
   public showData = false;
-  private apDataArr: any = null;
-  private mpuDataArr: any = null;
-  private bmpDataArr: any = null;
-  private deviceName;
+  public apDataArr: any = null;
+  public mpuDataArri8: any = null;
+  public bmpDataArr: any = null;
+  public deviceName;
   public scanning = false;
-  private readonly deviceMacAddress = 'F7:A2:12:8F:25:0C';
+  public accData = {} as AccelerometerData;
+  public gyroData = {} as GyroData;
+  public readonly deviceMacAddress = 'F7:A2:12:8F:25:0C';
   devices: any = [];
 
 
@@ -52,25 +65,6 @@ export class BeaconPage implements OnInit {
   }
   async ngOnInit() {
     await this.platform.ready().then( () => {
-
-        this.ngZone.run(() => {
-          this.showData = true;
-          this.apDataArr = new Array(5).fill(5);
-          this.apDataArr = this.apDataArr.map(x => (x / 14).toFixed(2) );
-          this.cd.detectChanges();
-          // console.log(advlib);
-          // const advData = {
-          //   serviceData: {
-          //     uuid: 'fee5',
-          //     data: '6a800001b5a3f393e0a9e50e24dcca9e'
-          //   }
-          // };
-          // const name = advlib.ble.common.memberservices.companyNames.fee5;
-          // console.log(name);
-          // const res = advlib.ble.data.gatt.services.members.process(advData);
-          // console.log(res);
-         // this.startScan();
-    });
   });
 }
 
@@ -79,14 +73,27 @@ export class BeaconPage implements OnInit {
     this.showData = false;
     if (this.scanning) {
       this.stopScan();
-      // console.log(this.devices);
     }
     console.log('started scanning');
     this.ble.isEnabled().then(() => {
       this.ble.isConnected(this.deviceMacAddress).then(
-        () => {
-         this.bleService.disconnect(this.deviceMacAddress);
-         this.startScan();
+        (device) => {
+          this.deviceName = device.name;
+          this.listenToDevice(
+            this.deviceMacAddress,
+            this.bleService.primaryServiceUuid,
+            this.bleService.apDataUuid,
+            'ap');
+          this.listenToDevice(
+            this.deviceMacAddress,
+            this.bleService.primaryServiceUuid,
+            this.bleService.mpuDataUuid,
+            'mpu');
+          this.listenToDevice(
+            this.deviceMacAddress,
+            this.bleService.primaryServiceUuid,
+            this.bleService.bmpDataUuid,
+            'bmp');
         },
       () => {
         this.ble.startScan([]).subscribe((device: PeripheralData) => {
@@ -112,9 +119,10 @@ export class BeaconPage implements OnInit {
 
 
    async connect(device) {
+     console.log('connecting');
      this.ble.stopScan();
      this.ble.connect(device.id).subscribe(
-      async (connectedDevice) => {
+      (connectedDevice) => {
         this.devices.splice(0, this.devices.length);
         this.cd.detectChanges();
         console.log('device');
@@ -154,25 +162,39 @@ export class BeaconPage implements OnInit {
       deviceId,
       serviceId,
       characteristics).subscribe(buffer => {
-      this.showData = true;
-      this.cd.detectChanges();
+
       if (data === 'ap') {
         this.apDataArr = new Uint8Array(buffer);
       }
+
       if (data === 'mpu') {
-        console.log(buffer);
-        const i8 = new Int8Array(buffer);
-        const f32 = new Float32Array(i8.buffer);
-        console.log(f32);
-        this.mpuDataArr = i8;
+        this.mpuDataArri8 = new Int8Array(buffer);
+        this.computeAccelerometerData(this.mpuDataArri8);
+        this.computeGyrometerData(this.mpuDataArri8);
       }
+
       if (data === 'bmp') {
         this.bmpDataArr = new Uint8Array(buffer);
       }
+
+      this.showData = true;
+      this.cd.detectChanges();
     });
 
   }
 
+  computeAccelerometerData(data) {
+    // vysledok je v jednotkach [g] (g je približne 9,8065 m/s-2)
+    this.accData.ax = ((data[0] * 256 + data[1]) / 16384);
+    this.accData.ay = (data[2] * 256 + data[3]) / 16384;
+    this.accData.az = (data[4] * 256 + data[5]) / 16384;
+  }
 
+  computeGyrometerData(data) {
+    // vysledok je v jednotkach [stupne/sekundu]
+    this.gyroData.gx = (data[6] * 256 + data[7]) / 131;
+    this.gyroData.gy = (data[8] * 256 + data[9]) / 131;
+    this.gyroData.gz = (data[10] * 256 + data[11]) / 131;
+  }
 
 }

@@ -1,0 +1,22 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Aktivácia účtu</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <ion-grid>
+    <ion-row>
+      <p>
+        Prosím, skontroljte emailovú adresu, ktorú ste použili pri registrácií a aktivujte si účet kliknutím na link v správe.
+      </p>
+  
+    </ion-row>
+    <ion-button type="submit" (click)="authService.SendVerificationMail()" expand="block">
+      Poslať znovu aktivačný email
+    </ion-button>
+    <ion-button (click)="backToLogin()" expand="block">
+      Prihlásiť sa
+    </ion-button>
+  </ion-grid>
+</ion-content>
