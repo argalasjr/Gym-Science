@@ -5,8 +5,8 @@
 </ion-header>
 
 <ion-content>
-  <ion-col size-lg="4" size-md="6" size-sm="6" size-xs="12">
-    <ion-list lines="none">
+  <ion-col >
+    <ion-list lines="none" *ngIf=!showData>
       <ion-item button *ngFor="let device of devices" (click)="connect(device)" detail>
         <ion-label>
           <h2>{{device.name}}</h2>
@@ -14,10 +14,40 @@
         </ion-label>
       </ion-item>
     </ion-list>
+   
     <ion-card *ngIf=showData>
-      <ion-card-header>Data received from {{ deviceName }} :</ion-card-header>
-      <ion-item> ax: {{ accData.ax | number:'1.2-2'}} ay: {{ accData.ay | number:'1.2-2'}} az: {{ accData.az | number:'1.2-2'}}</ion-item>
+      <app-beacon-chart></app-beacon-chart>
+      <!-- <ion-card-header>Data received from {{ deviceName }} :</ion-card-header>
+      <ion-item> ax: {{ accDataNew.ax | number:'1.2-2'}} ay: {{ accDataNew.ay | number:'1.2-2'}} az: {{ accDataNew.az | number:'1.2-2'}}</ion-item>
       <ion-item> gx: {{ gyroData.gx | number:'1.2-2'}} gy {{ gyroData.gy | number:'1.2-2'}} gz {{ gyroData.gz | number:'1.2-2'}}</ion-item>
+      <ion-item> vx: {{ velocityDataNew.vx | number:'1.2-2'}} vy {{ velocityDataNew.vy | number:'1.2-2'}} vz {{ velocityDataNew.vz | number:'1.2-2'}}</ion-item>
+      <ion-item> AccAbs: {{ accAbsoluteVectorDelta | number:'1.2-2'}} VelAbs: {{ velocityAbsoluteVectorNew | number:'1.2-2'}} </ion-item> -->
+      <ion-row>
+      <ion-button center-all block  color="danger" (click)="start()">Start!</ion-button>
+   
+      <ion-button center-all block  color="danger" (click)="end()">End!</ion-button>
+
+      <ion-button center-all block  color="danger" (click)="reset()">Reset!</ion-button>
+      </ion-row>
     </ion-card>
+
+    <ion-card *ngIf=showData>
+      <ion-item>
+        <p>Bar weight load: {{weight}} kg</p>    <ion-button slot="end" (click)="changeItem('weight')">Change</ion-button>
+      </ion-item>
+      <ion-item>
+        <p>Start order time: {{startTime}} s</p>    <ion-button  slot="end" (click)="changeItem('start')">Change</ion-button>
+      </ion-item>
+      <ion-item>
+        <p>Press order time: {{pressTime}} s</p>    <ion-button slot="end" (click)="changeItem('press')">Change</ion-button>
+      </ion-item>
+      <ion-item>
+        <p>Rack order time: {{rackTime}} s</p>    <ion-button slot="end"  (click)="changeItem('rack')">Change</ion-button>
+      </ion-item>
+        
+    </ion-card>
+
   </ion-col>
+
+
 </ion-content>

@@ -183,7 +183,7 @@ export class LiftChartComponent implements OnInit {
     this.velocityIndex = this.velocityIndex + 1;
     if (this.velocityIndex === this.velocityData.length) {
       this.velocityIndex = 0;
-      //return -1;
+      // return -1;
     }
     return this.velocityData[this.velocityIndex];
   }
