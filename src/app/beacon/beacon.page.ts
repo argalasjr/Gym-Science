@@ -5,7 +5,8 @@ import { BleService } from '../../services/ble/ble.service';
 import { BeaconChartComponent} from './beacon-chart/beacon-chart.component';
 import { ErrorDialogService } from '../services/error-dialog/error-dialog.service';
 import { LoadingService } from '../services/loading/loading.service';
-
+import { NativeAudio } from '@ionic-native/native-audio/ngx';
+import { NativeStorage } from '@ionic-native/native-storage/ngx';
 
 export interface PeripheralCharacteristic {
   service: string;
@@ -41,6 +42,13 @@ export interface GyroData {
   gz: number;
 }
 
+export enum Orders {
+  BarIsLoaded,
+  Start,
+  Press,
+  Rack
+}
+
 
 export interface PeripheralDataExtended extends PeripheralData {
   services: string[];
@@ -67,21 +75,33 @@ export class BeaconPage implements OnInit {
   public accDataNew = {} as AccelerometerData;
   public accDataOld = {} as AccelerometerData;
   public gyroData = {} as GyroData;
-  public accAbsoluteVectorDelta = null;
-  public accAbsoluteVectorNew = null;
-  public accAbsoluteVectorOld = null;
+  public accAbsoluteVectorDelta = 0;
+  public accAbsoluteVectorNew = 0;
+  public accAbsoluteVectorOld = 0;
   public velocityDataNew = {} as VelocityData;
   public velocityDataOld = {} as VelocityData;
+  public velocityAbsoluteVectorDelta = 0;
   public velocityAbsoluteVectorNew = 0;
   public velocityAbsoluteVectorOld = 0;
   public pathSum = 0;
-  private lifting = false;
+  public lifting = false;
   public weight = 0.0;
   public startTime = 1.0;
   public pressTime = 1.0;
   public rackTime = 1.0;
+  public timing = false;
+  public waitTime = 1;
+  private readonly orders = [ 'BarIsLoaded', 'Start', 'Press', 'Rack'];
+  private orderIndex = 0;
+  private didMove = false;
+  private competing = false;
+  public avgSpeed = 0;
+  public avgForce = 0;
+  public maxSpeed = 0;
+  public maxForce = 0;
 
-
+  private average = list => list.reduce((prev, curr) => prev + curr) / list.length;
+  private max = list => list.reduce((a, b) => Math.max(a, b));
   constructor(
     public platform: Platform,
     public ngZone: NgZone,
@@ -90,12 +110,21 @@ export class BeaconPage implements OnInit {
     public bleService: BleService,
     private alertCtrl: AlertController,
     private loadingService: LoadingService,
-    private helpers: ErrorDialogService
+    private helpers: ErrorDialogService,
+    private nativeAudio: NativeAudio,
+    private nativeStorage: NativeStorage
     ) {
   }
   async ngOnInit() {
 
     await this.platform.ready().then( () => {
+      this.nativeAudio.preloadSimple('Start', 'assets/records/start.mp3');
+      this.nativeAudio.preloadSimple('Press', 'assets/records/press.mp3');
+      this.nativeAudio.preloadSimple('Rack', 'assets/records/rack.mp3');
+      this.nativeAudio.preloadSimple('GoodLift', 'assets/records/goodlift.mp3');
+      this.nativeAudio.preloadSimple('NoLift', 'assets/records/nolift.mp3');
+      this.nativeAudio.preloadSimple('BarIsLoaded', 'assets/records/barisloaded.mp3');
+      this.nativeAudio.preloadSimple('Training', 'assets/records/training.mp3');
       this.startScan();
   });
 }
@@ -221,6 +250,11 @@ export class BeaconPage implements OnInit {
       }
       this.showData = true;
       this.cd.detectChanges();
+    },
+    (error) => {
+      this.showData = false;
+      this.cd.detectChanges();
+      this.helpers.showError(error);
     });
 
   }
@@ -236,6 +270,7 @@ export class BeaconPage implements OnInit {
     if (!this.accDataOld && !this.accDataNew) {
       this.accDataOld = {ax, ay, az, time };
       this.accDataNew = {ax, ay, az, time };
+      this.velocityAbsoluteVectorDelta = 0.1;
 
     } else {
       this.accDataOld.ax =  this.accDataNew.ax;
@@ -249,9 +284,9 @@ export class BeaconPage implements OnInit {
 
     let t = this.accDataNew.time.getMilliseconds() - this.accDataOld.time.getMilliseconds();
     t = Math.abs(t / 1000);
-    const vx = (this.accDataNew.ax - this.accDataOld.ax);
-    const vy = (this.accDataNew.ay - this.accDataOld.ay);
-    const vz = (this.accDataNew.az - this.accDataOld.az);
+    const vx = (this.accDataNew.ax - this.accDataOld.ax) * t;
+    const vy = (this.accDataNew.ay - this.accDataOld.ay) * t;
+    const vz = (this.accDataNew.az - this.accDataOld.az) * t;
     this.velocityDataNew = {vx , vy , vz };
     // compute acceleration vector absolute value
     this.accAbsoluteVectorOld = this.accAbsoluteVectorNew;
@@ -269,14 +304,20 @@ export class BeaconPage implements OnInit {
       Math.pow(vy, 2) +
       Math.pow(vz, 2)
     );
+    this.velocityAbsoluteVectorNew = Number(this.velocityAbsoluteVectorNew.toFixed(2));
+    this.velocityAbsoluteVectorDelta += this.velocityAbsoluteVectorNew * 100;
     // console.log('Vel vec new:', this.velocityAbsoluteVectorNew);
     // console.log('Vel vec old:', this.velocityAbsoluteVectorOld);
     // console.log('time diff', t);
+    if (this.isMoving()) {
+      this.didMove = true;
+    }
 
     // const pathInTimeStamp = (this.velocityAbsoluteVectorNew - this.velocityAbsoluteVectorOld) ;
     // console.log('path', pathInTimeStamp);
-    if (this.lifting) {
+    if (this.lifting && this.didMove) {
     this.chart.pushData(this.accAbsoluteVectorDelta);
+    this.competitionMode();
     }
   }
 
@@ -289,20 +330,57 @@ export class BeaconPage implements OnInit {
   }
   reset() {
     this.chart.reset();
+    this.orderIndex = 0;
   }
 
-  start() {
+  start(flag) {
+    if (this.weight > 0) {
+    flag ? this.nativeAudio.play('BarIsLoaded') : this.nativeAudio.play('Training');
     this.reset();
     this.lifting = true;
+    this.didMove = false;
+    this.competing = flag;
+    } else {
+      this.setWeightAlert();
+    }
   }
   end() {
+    this.didMove = false;
     this.lifting = false;
+    this.orderIndex = 0;
+    console.log(this.average(this.chart.lineChartData[0].data));
+    this.avgSpeed = Number((this.average(this.chart.lineChartData[0].data) * 3.6).toFixed(2));
+    this.maxSpeed = Number((this.max(this.chart.lineChartData[0].data) * 3.6 ).toFixed(2));
+    this.avgForce = Number((this.weight * (this.avgSpeed / 3.6)).toFixed(2));
+    this.maxForce = Number((this.weight * (this.maxSpeed / 3.6)).toFixed(2));
+    this.nativeStorage.setItem('w' + String(this.weight), {
+      avgSpeed: this.avgSpeed,
+      avgForce: this.avgForce,
+      maxSpeed: this.maxSpeed,
+      maxForce: this.maxForce});
+  }
+
+  async setWeightAlert() {
+
+    await this.alertCtrl.create({
+      message: 'Please set a weight before lifting',
+
+      buttons: [
+        {
+          text: 'Ok',
+          handler: () => {
+            this.changeItem('weight');
+          }
+        }
+      ]
+    }).then(alert => alert.present()).then(() => {
+    });
   }
 
   async changeItem(item) {
 
     await this.alertCtrl.create({
-      message: 'Set a new value',
+      message: 'Set a new ' + item,
       inputs: [
         { id: 'itemInput', name: item , type: 'number'}
       ],
@@ -314,15 +392,19 @@ export class BeaconPage implements OnInit {
               if ( item === 'weight') {
                 console.log(newData);
                 this.weight = newData.weight;
+                this.nativeStorage.getItem('w' + String(this.weight) ).then(
+                  (res) => {
+                    this.avgSpeed = res.avgSpeed;
+                    this.avgForce = res.avgForce;
+                    this.maxForce = res.maxForce;
+                    this.maxSpeed = res.maxSpeed;
+                    this.cd.detectChanges();
+                  },
+                  () => console.log('no savings')
+                );
               }
-              if ( item === 'start') {
-               this.startTime = newData.start;
-              }
-              if ( item === 'press') {
-                this.pressTime = newData.press;
-              }
-              if ( item === 'rack') {
-                this.rackTime = newData.rack;
+              if ( item === 'time') {
+               this.waitTime = newData.time;
               }
               this.cd.detectChanges();
           }
@@ -331,5 +413,50 @@ export class BeaconPage implements OnInit {
     }).then(alert => alert.present()).then(() => {
       document.getElementById('itemInput').focus();
     });
+  }
+
+  isMoving() {
+    return  Math.round(this.accAbsoluteVectorDelta) === 0 ? false : true;
+  }
+
+
+  competitionMode() {
+    if (!this.timing && !this.isMoving()) {
+      this.timing = true;
+      this.orderIndex += 1;
+      setTimeout(() => {
+        if (this.competing) {
+        console.log(this.orders[this.orderIndex]);
+        this.nativeAudio.play(this.orders[this.orderIndex]);
+        this.timing = false;
+        this.didMove = false;
+        if (this.orderIndex === 3) {
+          setTimeout(() => {
+            this.nativeAudio.play('GoodLift');
+            console.log('good lift');
+            this.end();
+          }, 1500);
+        }
+      } else {
+        this.nativeAudio.play('Press');
+        this.timing = false;
+        this.didMove = false;
+      }
+      }, this.waitTime * 1000);
+    }
+
+    if (this.timing && this.isMoving()) {
+      console.log('No lift');
+      this.nativeAudio.play('NoLift');
+      this.lifting = false;
+      this.orderIndex = 0;
+    }
+
+  }
+
+  disconnect() {
+    this.ble.disconnect(this.deviceMacAddress);
+    this.showData = false;
+    this.cd.detectChanges();
   }
 }

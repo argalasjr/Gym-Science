@@ -43,22 +43,23 @@
             Prihlásiť sa
           </ion-button>
           
-          <ion-button 
+          <!-- <ion-button 
           type="submit" 
           color="danger"
           (click)="authService.GoogleAuth()" 
          >
             Login with Google
-         </ion-button>
+         </ion-button> -->
     
-     
+         <ion-button center-all block clear (click)="createAccount()">
+          Registrovať
+        </ion-button>
+        
        <ion-button center-all block clear color="danger" (click)="resetPwd()">
          Zabudnuté heslo
        </ion-button>
      
-       <ion-button center-all block clear (click)="createAccount()">
-         Registrovať
-       </ion-button>
+
 
         </ion-col>
       </ion-row>

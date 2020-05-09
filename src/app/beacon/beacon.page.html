@@ -1,7 +1,13 @@
-<ion-header>
+<ion-header *ngIf=!showData>
     <ion-toolbar color='primary'>
     <ion-title (click)="startScan()">Click to scan</ion-title>
   </ion-toolbar>
+</ion-header>
+
+<ion-header *ngIf=showData>
+  <ion-toolbar color='primary'>
+  <ion-title (click)="disconnect()">Disconnect</ion-title>
+</ion-toolbar>
 </ion-header>
 
 <ion-content>
@@ -17,24 +23,34 @@
    
     <ion-card *ngIf=showData>
       <app-beacon-chart></app-beacon-chart>
-      <!-- <ion-card-header>Data received from {{ deviceName }} :</ion-card-header>
-      <ion-item> ax: {{ accDataNew.ax | number:'1.2-2'}} ay: {{ accDataNew.ay | number:'1.2-2'}} az: {{ accDataNew.az | number:'1.2-2'}}</ion-item>
+      <ion-item>
+        <p>Bar Weight: {{weight}} kg</p>    <ion-button slot="end" (click)="changeItem('weight')">Change</ion-button>
+      </ion-item>
+      <ion-item>
+        <p>Wait Time: {{waitTime}} s</p>    <ion-button slot="end" (click)="changeItem('time')">Change</ion-button>
+      </ion-item>
+      <ion-item>
+        <p>Avg Speed: {{avgSpeed}} [km/h] / Max Speed: {{maxSpeed}}  [km/h]</p> 
+      </ion-item>
+      <ion-item>
+        <p>Avg Force: {{avgForce}} [N] / Max Force: {{maxForce}} [N]</p> 
+      </ion-item>
+  
+      <!-- <ion-item> ax: {{ accDataNew.ax | number:'1.2-2'}} ay: {{ accDataNew.ay | number:'1.2-2'}} az: {{ accDataNew.az | number:'1.2-2'}}</ion-item>
       <ion-item> gx: {{ gyroData.gx | number:'1.2-2'}} gy {{ gyroData.gy | number:'1.2-2'}} gz {{ gyroData.gz | number:'1.2-2'}}</ion-item>
       <ion-item> vx: {{ velocityDataNew.vx | number:'1.2-2'}} vy {{ velocityDataNew.vy | number:'1.2-2'}} vz {{ velocityDataNew.vz | number:'1.2-2'}}</ion-item>
-      <ion-item> AccAbs: {{ accAbsoluteVectorDelta | number:'1.2-2'}} VelAbs: {{ velocityAbsoluteVectorNew | number:'1.2-2'}} </ion-item> -->
+      <ion-item> DeltaAcc: {{ accAbsoluteVectorDelta | number:'1.2-2'}} ActualAcc: {{ accAbsoluteVectorNew | number:'1.2-2'}} </ion-item> 
+      <ion-item> DeltaVel: {{ velocityAbsoluteVectorDelta }} ActualVel: {{ velocityAbsoluteVectorNew }} </ion-item> -->
       <ion-row>
-      <ion-button center-all block  color="danger" (click)="start()">Start!</ion-button>
-   
-      <ion-button center-all block  color="danger" (click)="end()">End!</ion-button>
-
-      <ion-button center-all block  color="danger" (click)="reset()">Reset!</ion-button>
+      <ion-button center-all block  color="danger" (click)="start(1)">Compete</ion-button>
+      <ion-button center-all block  color="danger" (click)="start(0)">Train</ion-button>
+      <ion-button [disabled]="!lifting" center-all block  color="danger" (click)="end()">End!</ion-button>
+      <ion-button [disabled]="!lifting" center-all block  color="danger" (click)="reset()">Reset!</ion-button>
       </ion-row>
     </ion-card>
 
-    <ion-card *ngIf=showData>
-      <ion-item>
-        <p>Bar weight load: {{weight}} kg</p>    <ion-button slot="end" (click)="changeItem('weight')">Change</ion-button>
-      </ion-item>
+    <!-- <ion-card *ngIf=showData>
+
       <ion-item>
         <p>Start order time: {{startTime}} s</p>    <ion-button  slot="end" (click)="changeItem('start')">Change</ion-button>
       </ion-item>
@@ -45,7 +61,7 @@
         <p>Rack order time: {{rackTime}} s</p>    <ion-button slot="end"  (click)="changeItem('rack')">Change</ion-button>
       </ion-item>
         
-    </ion-card>
+    </ion-card> -->
 
   </ion-col>
 
