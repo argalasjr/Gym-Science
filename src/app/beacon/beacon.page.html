@@ -24,7 +24,7 @@
     <ion-card *ngIf=showData>
       <app-beacon-chart></app-beacon-chart>
       <ion-item>
-        <p>Bar Weight: {{weight}} kg</p>    <ion-button slot="end" (click)="changeItem('weight')">Change</ion-button>
+        <p>Bar Weight: {{weight}} kg   Reps: {{reps}}</p>    <ion-button slot="end" (click)="changeItem('weight')">Change</ion-button>
       </ion-item>
       <ion-item>
         <p>Wait Time: {{waitTime}} s</p>    <ion-button slot="end" (click)="changeItem('time')">Change</ion-button>

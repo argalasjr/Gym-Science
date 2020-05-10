@@ -99,6 +99,7 @@ export class BeaconPage implements OnInit {
   public avgForce = 0;
   public maxSpeed = 0;
   public maxForce = 0;
+  public reps = 0;
 
   private average = list => list.reduce((prev, curr) => prev + curr) / list.length;
   private max = list => list.reduce((a, b) => Math.max(a, b));
@@ -316,7 +317,7 @@ export class BeaconPage implements OnInit {
     // const pathInTimeStamp = (this.velocityAbsoluteVectorNew - this.velocityAbsoluteVectorOld) ;
     // console.log('path', pathInTimeStamp);
     if (this.lifting && this.didMove) {
-    this.chart.pushData(this.accAbsoluteVectorDelta);
+    this.chart.pushData(this.accAbsoluteVectorDelta, t);
     this.competitionMode();
     }
   }
@@ -335,6 +336,7 @@ export class BeaconPage implements OnInit {
 
   start(flag) {
     if (this.weight > 0) {
+    this.reps = 0;
     flag ? this.nativeAudio.play('BarIsLoaded') : this.nativeAudio.play('Training');
     this.reset();
     this.lifting = true;
@@ -432,6 +434,8 @@ export class BeaconPage implements OnInit {
         this.didMove = false;
         if (this.orderIndex === 3) {
           setTimeout(() => {
+            this.reps = 1;
+            this.cd.detectChanges();
             this.nativeAudio.play('GoodLift');
             console.log('good lift');
             this.end();
@@ -439,8 +443,10 @@ export class BeaconPage implements OnInit {
         }
       } else {
         this.nativeAudio.play('Press');
+        this.reps += 1;
         this.timing = false;
         this.didMove = false;
+        this.cd.detectChanges();
       }
       }, this.waitTime * 1000);
     }
