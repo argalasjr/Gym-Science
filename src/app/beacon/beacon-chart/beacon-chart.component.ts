@@ -1,5 +1,5 @@
 import { Component, NgZone , ChangeDetectorRef, ViewChild } from '@angular/core';
-import { ChartDataSets, ChartOptions } from 'chart.js';
+import { ChartDataSets, ChartOptions, ChartPoint } from 'chart.js';
 import { Color, BaseChartDirective, Label } from 'ng2-charts';
 import * as pluginAnnotations from 'chartjs-plugin-annotation';
 @Component({
@@ -10,14 +10,17 @@ import * as pluginAnnotations from 'chartjs-plugin-annotation';
 export class BeaconChartComponent {
 
   public lineChartData: ChartDataSets[] = [
-    { data: [], label: 'Acceleration', yAxisID: 'y-axis-1' },
+    { data: [], label: 'Velocity [km/h] ', yAxisID: 'y-axis-1' },
   ];
   public lineChartLabels: Label[] = [];
   public lineChartOptions: (ChartOptions & { annotation: any }) = {
     responsive: true,
     scales: {
       // We use this empty structure as a placeholder for dynamic theming.
-      xAxes: [{}],
+      xAxes: [{
+        id: 'x-asix-0',
+        position: 'botttom'
+    }],
       yAxes: [
         {
           id: 'y-axis-1',
@@ -31,7 +34,23 @@ export class BeaconChartComponent {
         }
       ]
     },
-    annotation: {},
+    annotation: {
+      annotations: [
+        {
+          type: 'line',
+          drawTime: '',
+          mode: 'vertical',
+          scaleID: 'x-axis-0',
+          value: 'P',
+          borderColor: 'orange',
+          borderWidth: 2,
+          label: {
+            enabled: true,
+            fontColor: 'orange',
+            content: 'LineAnno'
+          }}
+      ],
+    },
   };
   public lineChartColors: Color[] = [
     { // grey
@@ -96,22 +115,32 @@ export class BeaconChartComponent {
     this.chart.update();
   }
 
-  public pushData(speed: any, t: any) {
+  public pushData(speed: any, order: any) {
     this.lineChartData.forEach((x, i) => {
       const data: number[] = x.data as number[];
+      if ( data.length === 0 ) {
+        data.push(0);
+        this.lineChartLabels.push('Start');
+      }
+      // round to 2 decimals precision
       speed = Number(speed.toFixed(2));
       if ( speed < 0.5) {
         speed = 0;
       }
+
+      // data in [km/h]
+      speed = speed * 3.6;
       data.push(speed);
+
     });
-    this.lineChartLabels.push(`${ t * 1000} `);
+
+    this.lineChartLabels.push(`${order}`);
     this.chart.update();
   }
 
   public reset() {
     this.lineChartData =  [
-      { data: [], label: 'Acceleration', yAxisID: 'y-axis-1' }];
+      { data: [], label: 'Velocity [km/h] ', yAxisID: 'y-axis-1'}];
     this.lineChartLabels = [];
     this.chart.update();
   }

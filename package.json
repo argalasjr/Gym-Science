@@ -46,6 +46,7 @@
     "fibers": "^4.0.3",
     "firebase": "^7.14.3",
     "html-webpack-plugin": "^4.3.0",
+    "native-run": "^1.0.0",
     "ng2-charts": "^2.3.0",
     "node-sass": "^4.14.1",
     "request": "^2.88.2",

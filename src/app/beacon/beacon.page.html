@@ -23,30 +23,33 @@
    
     <ion-card *ngIf=showData>
       <app-beacon-chart></app-beacon-chart>
+      <ion-list>
       <ion-item>
-        <p>Bar Weight: {{weight}} kg   Reps: {{reps}}</p>    <ion-button slot="end" (click)="changeItem('weight')">Change</ion-button>
+        <p>Bar Weight: {{weight}} kg   Reps: {{reps}}</p>    <ion-button  [disabled]="lifting" slot="end" (click)="changeItem('weight')">Change</ion-button>
       </ion-item>
       <ion-item>
-        <p>Wait Time: {{waitTime}} s</p>    <ion-button slot="end" (click)="changeItem('time')">Change</ion-button>
+        <p>Wait Time: {{waitTime}} s</p>    <ion-button  [disabled]="lifting" slot="end" (click)="changeItem('time')">Change</ion-button>
       </ion-item>
-      <ion-item>
-        <p>Avg Speed: {{avgSpeed}} [km/h] / Max Speed: {{maxSpeed}}  [km/h]</p> 
+     <ion-item>
+        <p>Velocity Factor [0.5 - 1.0]:  {{velocityFactor}}  </p> <ion-button  [disabled]="lifting" slot="end" (click)="changeItem('velocityFactor')">Change</ion-button>
+      
       </ion-item>
-      <ion-item>
-        <p>Avg Force: {{avgForce}} [N] / Max Force: {{maxForce}} [N]</p> 
-      </ion-item>
+    </ion-list>
   
       <!-- <ion-item> ax: {{ accDataNew.ax | number:'1.2-2'}} ay: {{ accDataNew.ay | number:'1.2-2'}} az: {{ accDataNew.az | number:'1.2-2'}}</ion-item>
       <ion-item> gx: {{ gyroData.gx | number:'1.2-2'}} gy {{ gyroData.gy | number:'1.2-2'}} gz {{ gyroData.gz | number:'1.2-2'}}</ion-item>
-      <ion-item> vx: {{ velocityDataNew.vx | number:'1.2-2'}} vy {{ velocityDataNew.vy | number:'1.2-2'}} vz {{ velocityDataNew.vz | number:'1.2-2'}}</ion-item>
+      <ion-item> velocity: {{ velocity * 3.6 | number:'1.2-2'}} vx: {{ velocityDataNew.vx | number:'1.2-2'}} vy {{ velocityDataNew.vy | number:'1.2-2'}} vz {{ velocityDataNew.vz | number:'1.2-2'}}</ion-item> 
       <ion-item> DeltaAcc: {{ accAbsoluteVectorDelta | number:'1.2-2'}} ActualAcc: {{ accAbsoluteVectorNew | number:'1.2-2'}} </ion-item> 
       <ion-item> DeltaVel: {{ velocityAbsoluteVectorDelta }} ActualVel: {{ velocityAbsoluteVectorNew }} </ion-item> -->
-      <ion-row>
-      <ion-button center-all block  color="danger" (click)="start(1)">Compete</ion-button>
-      <ion-button center-all block  color="danger" (click)="start(0)">Train</ion-button>
-      <ion-button [disabled]="!lifting" center-all block  color="danger" (click)="end()">End!</ion-button>
-      <ion-button [disabled]="!lifting" center-all block  color="danger" (click)="reset()">Reset!</ion-button>
-      </ion-row>
+      
+      <ion-button color="danger" (click)="start(1)">Compete </ion-button>
+      <ion-button [disabled]="competing"  color="danger" (click)="start(0)">Training</ion-button>
+      <ion-button  [disabled]="!lifting || competing" color="danger" (click)="end()">End Training!</ion-button>
+
+      <ion-item>
+        <ion-button slot="end" block color="danger" (click)="showStats('')">Show Stats</ion-button>
+      
+      </ion-item>
     </ion-card>
 
     <!-- <ion-card *ngIf=showData>
